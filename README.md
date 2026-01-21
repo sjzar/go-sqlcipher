@@ -1,13 +1,15 @@
 ## go-sqlcipher
 
-[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/mutecomm/go-sqlcipher) [![CI](https://github.com/mutecomm/go-sqlcipher/workflows/CI/badge.svg)](https://github.com/mutecomm/go-sqlcipher/actions)
+### Note
+
+This project is modified from [mutecomm/go-sqlcipher](https://github.com/mutecomm/go-sqlcipher) and [mattn/go-sqlite3](https://github.com/mattn/go-sqlite3). It has not been rigorously tested, so please do not use it in a production environment.
 
 ### Description
 
 Self-contained Go sqlite3 driver with an AES-256 encrypted sqlite3 database
 conforming to the built-in database/sql interface. It is based on:
 
-- Go sqlite3 driver: https://github.com/mattn/go-sqlite3
+- Go sqlite3 driver: https://github.com/sjzar/go-sqlcipher
 - SQLite extension with AES-256 codec: https://github.com/sqlcipher/sqlcipher
 - AES-256 implementation from: https://github.com/libtom/libtomcrypt
 
@@ -27,13 +29,13 @@ See [migrating databases](https://www.zetetic.net/sqlcipher/sqlcipher-api/#Migra
 
 To upgrade your Go code to the 4.x series, change the import path to
 
-    "github.com/mutecomm/go-sqlcipher/v4"
+    "github.com/sjzar/go-sqlcipher"
 
 ### Installation
 
 This package can be installed with the go get command:
 
-    go get github.com/mutecomm/go-sqlcipher
+    go get github.com/sjzar/go-sqlcipher
 
 
 ### Documentation
@@ -62,10 +64,10 @@ SQLCipher. Do not forget the `url.QueryEscape()` call in your code!
 See also [PRAGMA key](https://www.zetetic.net/sqlcipher/sqlcipher-api/#PRAGMA_key).
 
 API documentation can be found here:
-http://godoc.org/github.com/mutecomm/go-sqlcipher
+http://godoc.org/github.com/sjzar/go-sqlcipher
 
 Use the function
-[sqlite3.IsEncrypted()](https://godoc.org/github.com/mutecomm/go-sqlcipher#IsEncrypted)
+[sqlite3.IsEncrypted()](https://godoc.org/github.com/sjzar/go-sqlcipher#IsEncrypted)
 to check whether a database file is encrypted or not.
 
 Examples can be found under the `./_example` directory

@@ -9,9 +9,12 @@ tracked for changes (maintenance details below):
 Update code from https://github.com/mattn/go-sqlite3
 ----------------------------------------------------
 
-Current release: v1.14.5
+Current release: v1.14.33
 
-Use ./track_go-sqlite3.sh
+1. git clone mattn/go-sqlite3 new version to temp dir
+2. Use ./track_go-sqlite3.sh <mattn/go-sqlite3 dir>
+3. find & sed mattn/go-sqlite3 to sjzar/go-sqlcipher
+4. rewrite pragma args golang code to sqlite3.go
 
 
 Update code from https://github.com/sqlcipher/sqlcipher
