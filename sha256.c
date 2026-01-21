@@ -309,13 +309,22 @@ int  sha256_test(void)
       sha256_init(&md);
       sha256_process(&md, (unsigned char*)tests[i].msg, (unsigned long)XSTRLEN(tests[i].msg));
       sha256_done(&md, tmp);
-      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "SHA256", i)) {
+      if (ltc_compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "SHA256", i)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
   }
   return CRYPT_OK;
  #endif
 }
+
+#undef Ch
+#undef Maj
+#undef S
+#undef R
+#undef Sigma0
+#undef Sigma1
+#undef Gamma0
+#undef Gamma1
 
 #endif
 

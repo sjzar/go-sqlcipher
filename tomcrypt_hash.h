@@ -14,6 +14,18 @@ struct sha3_state {
 };
 #endif
 
+#ifdef LTC_KANGAROO_TWELVE
+struct kangaroo_twelve_state {
+    struct sha3_state outer;
+    struct sha3_state inner;
+    ulong64 blocks_count;
+    ulong64 customization_len;
+    unsigned short remaining; /* bytes out of 8kB block */
+    unsigned char phase; /* 0 -- initial, 1 -- additional */
+    unsigned char finished; /* 0 -- false, 1 -- true */
+};
+#endif
+
 #ifdef LTC_SHA512
 struct sha512_state {
     ulong64  length, state[8];
@@ -57,8 +69,8 @@ struct md4_state {
 #ifdef LTC_TIGER
 struct tiger_state {
     ulong64 state[3], length;
-    unsigned long curlen;
-    unsigned char buf[64];
+    unsigned long curlen, passes;
+    unsigned char buf[64], pad;
 };
 #endif
 
@@ -151,6 +163,9 @@ typedef union Hash_state {
 #endif
 #if defined(LTC_SHA3) || defined(LTC_KECCAK)
     struct sha3_state sha3;
+#endif
+#ifdef LTC_KANGAROO_TWELVE
+    struct kangaroo_twelve_state kt;
 #endif
 #ifdef LTC_SHA512
     struct sha512_state sha512;
@@ -302,6 +317,21 @@ int keccak_224_test(void);
 int keccak_done(hash_state *md, unsigned char *out);
 #endif
 
+#ifdef LTC_TURBO_SHAKE
+#define turbo_shake_init(a, b) sha3_shake_init(a, b)
+int turbo_shake_process(hash_state *md, const unsigned char *in, unsigned long inlen);
+int turbo_shake_done(hash_state *md, unsigned char *out, unsigned long outlen);
+int turbo_shake_test(void);
+#endif
+
+#ifdef LTC_KANGAROO_TWELVE
+int kangaroo_twelve_init(hash_state *md, int num);
+int kangaroo_twelve_process(hash_state *md, const unsigned char *in, unsigned long inlen);
+int kangaroo_twelve_customization(hash_state *md, const unsigned char *in, unsigned long inlen);
+int kangaroo_twelve_done(hash_state *md, unsigned char *out, unsigned long outlen);
+int kangaroo_twelve_test(void);
+#endif
+
 #ifdef LTC_SHA512
 int sha512_init(hash_state * md);
 int sha512_process(hash_state * md, const unsigned char *in, unsigned long inlen);
@@ -440,10 +470,16 @@ extern const struct ltc_hash_descriptor md2_desc;
 
 #ifdef LTC_TIGER
 int tiger_init(hash_state * md);
+int tiger_init_ex(hash_state *md, unsigned long passes);
 int tiger_process(hash_state * md, const unsigned char *in, unsigned long inlen);
 int tiger_done(hash_state * md, unsigned char *out);
 int tiger_test(void);
-extern const struct ltc_hash_descriptor tiger_desc;
+int tiger2_init(hash_state *md);
+int tiger2_init_ex(hash_state *md, unsigned long passes);
+#define tiger2_process(m, i, l) tiger_process(m, i, l)
+#define tiger2_done(m, o)       tiger_done(m, o)
+int tiger2_test(void);
+extern const struct ltc_hash_descriptor tiger_desc, tiger2_desc;
 #endif
 
 #ifdef LTC_RIPEMD128
@@ -494,7 +530,8 @@ int hash_memory(int hash,
                 const unsigned char *in,  unsigned long inlen,
                       unsigned char *out, unsigned long *outlen);
 int hash_memory_multi(int hash, unsigned char *out, unsigned long *outlen,
-                      const unsigned char *in, unsigned long inlen, ...);
+                      const unsigned char *in, unsigned long inlen, ...)
+                      LTC_NULL_TERMINATED;
 
 #ifndef LTC_NO_FILE
 int hash_filehandle(int hash, FILE *in, unsigned char *out, unsigned long *outlen);

@@ -263,13 +263,22 @@ int  sha1_test(void)
       sha1_init(&md);
       sha1_process(&md, (unsigned char*)tests[i].msg, (unsigned long)XSTRLEN(tests[i].msg));
       sha1_done(&md, tmp);
-      if (compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "SHA1", i)) {
+      if (ltc_compare_testvector(tmp, sizeof(tmp), tests[i].hash, sizeof(tests[i].hash), "SHA1", i)) {
          return CRYPT_FAIL_TESTVECTOR;
       }
   }
   return CRYPT_OK;
   #endif
 }
+
+#undef F0
+#undef F1
+#undef F2
+#undef F3
+#undef FF0
+#undef FF1
+#undef FF2
+#undef FF3
 
 #endif
 

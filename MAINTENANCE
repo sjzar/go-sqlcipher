@@ -37,7 +37,9 @@ Execute:
 Update code from https://github.com/libtom/libtomcrypt
 ------------------------------------------------------
 
-Current HEAD: cfbd7f8d364e1438555ff2a247f7e17add11840e
-(from develop branch, 2020-08-29)
+Current HEAD: 9a13375d47ea8c453ef0359c91a056a1c5484192
+(from develop branch, 2025-11-29)
+
+(WTF! libtomcrypt repo looks terrible; the last release was 8 years ago, and all the code is piled up on the develop branch.)
 
 Use ./track_libtomcrypt.sh
