@@ -7,6 +7,14 @@ package sqlite3
 // enable encryption codec in sqlite
 #cgo CFLAGS: -DSQLITE_HAS_CODEC
 
+// SQLCipher 4.7.0 Breaking Change
+// Requires defining
+//   `SQLITE_EXTRA_INIT=sqlcipher_extra_init` and
+//   `SQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown`
+// at compile time for optimized library initialization and cleanup
+#cgo CFLAGS: -DSQLITE_EXTRA_INIT=sqlcipher_extra_init
+#cgo CFLAGS: -DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown
+
 // use memory for temporay storage in sqlite
 #cgo CFLAGS: -DSQLITE_TEMP_STORE=2
 

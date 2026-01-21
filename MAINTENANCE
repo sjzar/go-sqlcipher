@@ -20,15 +20,18 @@ Current release: v1.14.33
 Update code from https://github.com/sqlcipher/sqlcipher
 -------------------------------------------------------
 
-Current release: v4.4.2
+Current release: v4.12.0
+
+Note:
+v4.12.0 removed support for LibTomCrypt, the corresponding commit needs to be reverted. Related ISSUE: https://github.com/sqlcipher/sqlcipher/issues/564
 
 Execute:
-./configure
-make
-
-Track files:
-sqlite3.h
-sqlite3.c
+1. git clone sqlcipher to temp dir
+2. git checkout v4.12.0 & git revert 3607cf6 (https://github.com/sqlcipher/sqlcipher/commit/3607cf6)
+3. ./configure --with-tempstore=yes CFLAGS="-DSQLITE_HAS_CODEC -DSQLITE_EXTRA_INIT=sqlcipher_extra_init -DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown -DSQLCIPHER_CRYPTO_LIBTOMCRYPT"
+4. make
+5. track sqlite3.c & sqlite3.h files
+6. rewrite flags.go add CFLAGSs
 
 
 Update code from https://github.com/libtom/libtomcrypt
