@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: Unlicense */
 
 #include "tomcrypt.h"
+#include <stdint.h>
 #include <stdarg.h>
 
 #ifndef TOMCRYPT_PRIVATE_H_
@@ -15,12 +16,7 @@
 
 #define LTC_PAD_MASK       (0xF000U)
 
-/* only real 64bit, not ILP32 */
-#if defined(ENDIAN_64BITWORD) && !defined(ENDIAN_64BITWORD_ILP32)
-   #define CONSTPTR(n) CONST64(n)
-#else
-   #define CONSTPTR(n) n ## uL
-#endif
+#define CONSTPTR(n) ((uintptr_t)(n))
 
 LTC_STATIC_ASSERT(correct_CONSTPTR_size, sizeof(CONSTPTR(1)) == sizeof(void*))
 
