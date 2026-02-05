@@ -1,3 +1,8 @@
+/* FIXME: Force enable HAVE_STDINT_H
+*/
+#ifndef HAVE_STDINT_H
+#define HAVE_STDINT_H 1
+#endif
 /******************************************************************************
 ** This file is an amalgamation of many separate C source files from SQLite
 ** version 3.51.1.  By combining all the individual C code files into this
