@@ -1,5 +1,4 @@
 //go:build sqlite_math_functions
-// +build sqlite_math_functions
 
 package sqlite3
 
@@ -9,7 +8,7 @@ import (
 )
 
 func TestMathFunctions(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlcipher", ":memory:")
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}

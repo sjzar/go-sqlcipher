@@ -4,7 +4,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build cgo
-// +build cgo
 
 package sqlite3
 
@@ -24,7 +23,7 @@ func TestSimpleError(t *testing.T) {
 }
 
 func TestCorruptDbErrors(t *testing.T) {
-	dirName, err := ioutil.TempDir("", "sqlite3")
+	dirName, err := ioutil.TempDir("", "sqlcipher")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +37,7 @@ func TestCorruptDbErrors(t *testing.T) {
 	f.Write([]byte{1, 2, 3, 4, 5})
 	f.Close()
 
-	db, err := sql.Open("sqlite3", dbFileName)
+	db, err := sql.Open("sqlcipher", dbFileName)
 	if err == nil {
 		_, err = db.Exec("drop table foo")
 	}
@@ -57,14 +56,14 @@ func TestCorruptDbErrors(t *testing.T) {
 }
 
 func TestSqlLogicErrors(t *testing.T) {
-	dirName, err := ioutil.TempDir("", "sqlite3")
+	dirName, err := ioutil.TempDir("", "sqlcipher")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dirName)
 
 	dbFileName := path.Join(dirName, "test.db")
-	db, err := sql.Open("sqlite3", dbFileName)
+	db, err := sql.Open("sqlcipher", dbFileName)
 	if err != nil {
 		t.Error(err)
 	}
@@ -91,7 +90,7 @@ func TestExtendedErrorCodes_ForeignKey(t *testing.T) {
 	defer os.RemoveAll(dirName)
 
 	dbFileName := path.Join(dirName, "test.db")
-	db, err := sql.Open("sqlite3", dbFileName)
+	db, err := sql.Open("sqlcipher", dbFileName)
 	if err != nil {
 		t.Error(err)
 	}
@@ -137,7 +136,7 @@ func TestExtendedErrorCodes_NotNull(t *testing.T) {
 	defer os.RemoveAll(dirName)
 
 	dbFileName := path.Join(dirName, "test.db")
-	db, err := sql.Open("sqlite3", dbFileName)
+	db, err := sql.Open("sqlcipher", dbFileName)
 	if err != nil {
 		t.Error(err)
 	}
@@ -193,7 +192,7 @@ func TestExtendedErrorCodes_Unique(t *testing.T) {
 	defer os.RemoveAll(dirName)
 
 	dbFileName := path.Join(dirName, "test.db")
-	db, err := sql.Open("sqlite3", dbFileName)
+	db, err := sql.Open("sqlcipher", dbFileName)
 	if err != nil {
 		t.Error(err)
 	}
@@ -253,7 +252,7 @@ func TestError_SystemErrno(t *testing.T) {
 	}
 
 	// open a non-existent database in read-only mode so we get an IO error.
-	db, err := sql.Open("sqlite3", "file:nonexistent.db?mode=ro")
+	db, err := sql.Open("sqlcipher", "file:nonexistent.db?mode=ro")
 	if err != nil {
 		t.Fatal(err)
 	}

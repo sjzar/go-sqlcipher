@@ -11,7 +11,7 @@
 #include <sqlite3.h>
 #endif
 
-extern int unlock_notify_wait(sqlite3 *db);
+extern int gsc_unlock_notify_wait(sqlite3 *db);
 
 int
 _sqlite3_step_blocking(sqlite3_stmt *stmt)
@@ -28,7 +28,7 @@ _sqlite3_step_blocking(sqlite3_stmt *stmt)
     if (sqlite3_extended_errcode(db) != SQLITE_LOCKED_SHAREDCACHE) {
       break;
     }
-    rv = unlock_notify_wait(db);
+    rv = gsc_unlock_notify_wait(db);
     if (rv != SQLITE_OK) {
       break;
     }
@@ -53,7 +53,7 @@ _sqlite3_step_row_blocking(sqlite3_stmt* stmt, long long* rowid, long long* chan
     if (sqlite3_extended_errcode(db) != SQLITE_LOCKED_SHAREDCACHE) {
       break;
     }
-    rv = unlock_notify_wait(db);
+    rv = gsc_unlock_notify_wait(db);
     if (rv != SQLITE_OK) {
       break;
     }
@@ -78,7 +78,7 @@ _sqlite3_prepare_v2_blocking(sqlite3 *db, const char *zSql, int nBytes, sqlite3_
     if (sqlite3_extended_errcode(db) != SQLITE_LOCKED_SHAREDCACHE) {
       break;
     }
-    rv = unlock_notify_wait(db);
+    rv = gsc_unlock_notify_wait(db);
     if (rv != SQLITE_OK) {
       break;
     }

@@ -4,7 +4,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build cgo
-// +build cgo
 
 package sqlite3
 
@@ -48,7 +47,7 @@ func doTestOpen(t *testing.T, option string) (string, error) {
 		}
 	}()
 
-	db, err := sql.Open("sqlite3", url)
+	db, err := sql.Open("sqlcipher", url)
 	if err != nil {
 		return "Failed to open database:", err
 	}
@@ -111,7 +110,7 @@ func TestOpenWithVFS(t *testing.T) {
 	}
 	defer os.Remove(filename)
 
-	db, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?vfs=hello", filename))
+	db, err := sql.Open("sqlcipher", fmt.Sprintf("file:%s?vfs=hello", filename))
 	if err != nil {
 		t.Fatal("Failed to open", err)
 	}
@@ -129,7 +128,7 @@ func TestOpenWithVFS(t *testing.T) {
 	} else {
 		vfs = "unix-none"
 	}
-	db, err = sql.Open("sqlite3", fmt.Sprintf("file:%s?vfs=%s", filename, vfs))
+	db, err = sql.Open("sqlcipher", fmt.Sprintf("file:%s?vfs=%s", filename, vfs))
 	if err != nil {
 		t.Fatal("Failed to open", err)
 	}
@@ -151,7 +150,7 @@ func TestOpenNoCreate(t *testing.T) {
 	// https://golang.org/pkg/database/sql/#Open
 	// "Open may just validate its arguments without creating a connection
 	// to the database. To verify that the data source name is valid, call Ping."
-	db, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?mode=rw", filename))
+	db, err := sql.Open("sqlcipher", fmt.Sprintf("file:%s?mode=rw", filename))
 	if err == nil {
 		defer db.Close()
 
@@ -179,7 +178,7 @@ func TestOpenNoCreate(t *testing.T) {
 	}
 
 	// verify that it works if the mode is "rwc" instead
-	db, err = sql.Open("sqlite3", fmt.Sprintf("file:%s?mode=rwc", filename))
+	db, err = sql.Open("sqlcipher", fmt.Sprintf("file:%s?mode=rwc", filename))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -202,13 +201,13 @@ func TestReadonly(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
 
-	db1, err := sql.Open("sqlite3", "file:"+tempFilename)
+	db1, err := sql.Open("sqlcipher", "file:"+tempFilename)
 	if err != nil {
 		t.Fatal(err)
 	}
 	db1.Exec("CREATE TABLE test (x int, y float)")
 
-	db2, err := sql.Open("sqlite3", "file:"+tempFilename+"?mode=ro")
+	db2, err := sql.Open("sqlcipher", "file:"+tempFilename+"?mode=ro")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +226,7 @@ func TestForeignKeys(t *testing.T) {
 	for option, want := range cases {
 		fname := TempFilename(t)
 		uri := "file:" + fname + option
-		db, err := sql.Open("sqlite3", uri)
+		db, err := sql.Open("sqlcipher", uri)
 		if err != nil {
 			os.Remove(fname)
 			t.Errorf("sql.Open(\"sqlite3\", %q): %v", uri, err)
@@ -251,7 +250,7 @@ func TestForeignKeys(t *testing.T) {
 func TestDeferredForeignKey(t *testing.T) {
 	fname := TempFilename(t)
 	uri := "file:" + fname + "?_foreign_keys=1"
-	db, err := sql.Open("sqlite3", uri)
+	db, err := sql.Open("sqlcipher", uri)
 	if err != nil {
 		os.Remove(fname)
 		t.Errorf("sql.Open(\"sqlite3\", %q): %v", uri, err)
@@ -293,7 +292,7 @@ func TestRecursiveTriggers(t *testing.T) {
 	for option, want := range cases {
 		fname := TempFilename(t)
 		uri := "file:" + fname + option
-		db, err := sql.Open("sqlite3", uri)
+		db, err := sql.Open("sqlcipher", uri)
 		if err != nil {
 			os.Remove(fname)
 			t.Errorf("sql.Open(\"sqlite3\", %q): %v", uri, err)
@@ -317,7 +316,7 @@ func TestRecursiveTriggers(t *testing.T) {
 func TestClose(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -343,7 +342,7 @@ func TestClose(t *testing.T) {
 func TestInsert(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -386,7 +385,7 @@ func TestUpsert(t *testing.T) {
 	}
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -431,7 +430,7 @@ func TestUpsert(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -468,7 +467,7 @@ func TestUpdate(t *testing.T) {
 		t.Fatal("Failed to get LastInsertId:", err)
 	}
 	if expected != lastID {
-		t.Errorf("Expected %q for last Id, but %q:", expected, lastID)
+		t.Errorf("Expected %d for last Id, but %d:", expected, lastID)
 	}
 	affected, _ = res.RowsAffected()
 	if err != nil {
@@ -496,7 +495,7 @@ func TestUpdate(t *testing.T) {
 func TestDelete(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -521,7 +520,7 @@ func TestDelete(t *testing.T) {
 		t.Fatal("Failed to get RowsAffected:", err)
 	}
 	if affected != 1 {
-		t.Errorf("Expected %d for cout of affected rows, but %q:", 1, affected)
+		t.Errorf("Expected %d for cout of affected rows, but %d:", 1, affected)
 	}
 
 	res, err = db.Exec("delete from foo where id = 123")
@@ -533,14 +532,14 @@ func TestDelete(t *testing.T) {
 		t.Fatal("Failed to get LastInsertId:", err)
 	}
 	if expected != lastID {
-		t.Errorf("Expected %q for last Id, but %q:", expected, lastID)
+		t.Errorf("Expected %d for last Id, but %d:", expected, lastID)
 	}
 	affected, err = res.RowsAffected()
 	if err != nil {
 		t.Fatal("Failed to get RowsAffected:", err)
 	}
 	if affected != 1 {
-		t.Errorf("Expected %d for cout of affected rows, but %q:", 1, affected)
+		t.Errorf("Expected %d for cout of affected rows, but %d:", 1, affected)
 	}
 
 	rows, err := db.Query("select id from foo")
@@ -557,7 +556,7 @@ func TestDelete(t *testing.T) {
 func TestBooleanRoundtrip(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -608,7 +607,7 @@ func timezone(t time.Time) string { return t.Format("-07:00") }
 func TestTimestamp(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -710,7 +709,7 @@ func TestTimestamp(t *testing.T) {
 func TestBoolean(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -802,7 +801,7 @@ func TestBoolean(t *testing.T) {
 func TestFloat32(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -839,7 +838,7 @@ func TestFloat32(t *testing.T) {
 func TestNull(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -870,7 +869,7 @@ func TestNull(t *testing.T) {
 func TestTransaction(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -929,7 +928,7 @@ func TestTransaction(t *testing.T) {
 func TestWAL(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -977,7 +976,7 @@ func TestTimezoneConversion(t *testing.T) {
 	for _, tz := range zones {
 		tempFilename := TempFilename(t)
 		defer os.Remove(tempFilename)
-		db, err := sql.Open("sqlite3", tempFilename+"?_loc="+url.QueryEscape(tz))
+		db, err := sql.Open("sqlcipher", tempFilename+"?_loc="+url.QueryEscape(tz))
 		if err != nil {
 			t.Fatal("Failed to open database:", err)
 		}
@@ -1073,7 +1072,7 @@ func TestTimezoneConversion(t *testing.T) {
 func TestExecer(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -1093,7 +1092,7 @@ func TestExecer(t *testing.T) {
 func TestQueryer(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -1144,7 +1143,7 @@ func TestQueryer(t *testing.T) {
 func TestStress(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -1154,7 +1153,7 @@ func TestStress(t *testing.T) {
 	db.Close()
 
 	for i := 0; i < 10000; i++ {
-		db, err := sql.Open("sqlite3", tempFilename)
+		db, err := sql.Open("sqlcipher", tempFilename)
 		if err != nil {
 			t.Fatal("Failed to open database:", err)
 		}
@@ -1183,7 +1182,7 @@ func TestDateTimeLocal(t *testing.T) {
 	zone := "Asia/Tokyo"
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename+"?_loc="+zone)
+	db, err := sql.Open("sqlcipher", tempFilename+"?_loc="+zone)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -1201,7 +1200,7 @@ func TestDateTimeLocal(t *testing.T) {
 	}
 	db.Close()
 
-	db, err = sql.Open("sqlite3", tempFilename)
+	db, err = sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -1226,7 +1225,7 @@ func TestDateTimeLocal(t *testing.T) {
 	db.Exec("INSERT INTO foo VALUES(?);", dt)
 
 	db.Close()
-	db, err = sql.Open("sqlite3", tempFilename+"?_loc="+zone)
+	db, err = sql.Open("sqlcipher", tempFilename+"?_loc="+zone)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -1251,7 +1250,7 @@ func TestVersion(t *testing.T) {
 func TestStringContainingZero(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -1311,7 +1310,7 @@ func (t TimeStamp) Value() (driver.Value, error) {
 func TestDateTimeNow(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -1322,6 +1321,50 @@ func TestDateTimeNow(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to scan datetime:", err)
 	}
+}
+
+func TestBindErrorPaths(t *testing.T) {
+	d := &SQLiteDriver{}
+	conn, err := d.Open(":memory:")
+	if err != nil {
+		t.Fatal("Failed to open database:", err)
+	}
+	defer conn.Close()
+	c := conn.(*SQLiteConn)
+
+	if _, err := c.Exec("CREATE TABLE t (v)", nil); err != nil {
+		t.Fatal("Failed to create table:", err)
+	}
+
+	// An unsupported Go type must report an explicit error instead of
+	// silently binding NULL: positional parameter.
+	_, err = c.Exec("INSERT INTO t VALUES (?)", []driver.Value{int32(1)})
+	if err == nil || !strings.Contains(err.Error(), "unsupported bind type int32") {
+		t.Errorf("positional bind of unsupported type: got %v, want unsupported bind type error", err)
+	}
+
+	// The same for a named parameter.
+	stmt, err := c.Prepare("INSERT INTO t VALUES (:x)")
+	if err != nil {
+		t.Fatal("Failed to prepare:", err)
+	}
+	err = stmt.(*SQLiteStmt).bind([]driver.NamedValue{{Name: "x", Ordinal: 1, Value: int32(1)}})
+	if err == nil || !strings.Contains(err.Error(), "unsupported bind type int32") {
+		t.Errorf("named bind of unsupported type: got %v, want unsupported bind type error", err)
+	}
+	stmt.Close()
+
+	// A genuine SQLite bind failure must preserve the recorded error.
+	stmt, err = c.Prepare("INSERT INTO t VALUES (?)")
+	if err != nil {
+		t.Fatal("Failed to prepare:", err)
+	}
+	err = stmt.(*SQLiteStmt).bind([]driver.NamedValue{{Ordinal: 2, Value: int64(1)}})
+	var serr Error
+	if !errors.As(err, &serr) || serr.Code != ErrRange {
+		t.Errorf("out-of-range bind: got %v, want SQLITE_RANGE error", err)
+	}
+	stmt.Close()
 }
 
 func TestFunctionRegistration(t *testing.T) {
@@ -1436,6 +1479,107 @@ func TestFunctionRegistration(t *testing.T) {
 		} else if !reflect.DeepEqual(ret.Elem().Interface(), op.expected) {
 			t.Errorf("Query %q returned wrong value: got %v (%T), want %v (%T)", op.query, ret.Elem().Interface(), ret.Elem().Interface(), op.expected, op.expected)
 		}
+	}
+}
+
+func TestFunctionRegistrationNamedTypes(t *testing.T) {
+	type NInt int64
+	type NFloat float64
+	type NString string
+	type NBlob []byte
+	type NBool bool
+
+	dur := func(n int64) time.Duration { return time.Duration(n) }
+	nint := func(a, b NInt) NInt { return a + b }
+	nfloat := func(a, b NFloat) NFloat { return a + b }
+	nstring := func(s NString) NString { return s + "!" }
+	nblob := func(s string) NBlob { return NBlob(s) }
+	nbool := func(b NBool) NBool { return !b }
+
+	sql.Register("sqlite3_FunctionRegistrationNamedTypes", &SQLiteDriver{
+		ConnectHook: func(conn *SQLiteConn) error {
+			if err := conn.RegisterFunc("dur", dur, true); err != nil {
+				return err
+			}
+			if err := conn.RegisterFunc("nint", nint, true); err != nil {
+				return err
+			}
+			if err := conn.RegisterFunc("nfloat", nfloat, true); err != nil {
+				return err
+			}
+			if err := conn.RegisterFunc("nstring", nstring, true); err != nil {
+				return err
+			}
+			if err := conn.RegisterFunc("nblob", nblob, true); err != nil {
+				return err
+			}
+			return conn.RegisterFunc("nbool", nbool, true)
+		},
+	})
+	db, err := sql.Open("sqlite3_FunctionRegistrationNamedTypes", ":memory:")
+	if err != nil {
+		t.Fatal("Failed to open database:", err)
+	}
+	defer db.Close()
+
+	ops := []struct {
+		query    string
+		expected any
+	}{
+		{"SELECT dur(42)", int64(42)},
+		{"SELECT nint(1,2)", int64(3)},
+		{"SELECT nfloat(1.5,1.5)", float64(3)},
+		{`SELECT nstring('foo')`, "foo!"},
+		{`SELECT nblob('xy')`, []byte("xy")},
+		// An empty blob result is mapped to SQL NULL.
+		{`SELECT nblob('') IS NULL`, true},
+		{"SELECT nbool(0)", true},
+	}
+
+	for _, op := range ops {
+		ret := reflect.New(reflect.TypeOf(op.expected))
+		err = db.QueryRow(op.query).Scan(ret.Interface())
+		if err != nil {
+			t.Errorf("Query %q failed: %s", op.query, err)
+		} else if !reflect.DeepEqual(ret.Elem().Interface(), op.expected) {
+			t.Errorf("Query %q returned wrong value: got %v (%T), want %v (%T)", op.query, ret.Elem().Interface(), ret.Elem().Interface(), op.expected, op.expected)
+		}
+	}
+}
+
+func TestFunctionArgStringContainingZero(t *testing.T) {
+	sql.Register("sqlite3_FunctionArgZero", &SQLiteDriver{
+		ConnectHook: func(conn *SQLiteConn) error {
+			// arglen reports how many bytes of the text argument reached the
+			// Go side; echo returns the string result verbatim.
+			if err := conn.RegisterFunc("arglen", func(s string) int64 { return int64(len(s)) }, true); err != nil {
+				return err
+			}
+			return conn.RegisterFunc("echo", func(s string) string { return s }, true)
+		},
+	})
+	db, err := sql.Open("sqlite3_FunctionArgZero", ":memory:")
+	if err != nil {
+		t.Fatal("Failed to open database:", err)
+	}
+	defer db.Close()
+
+	const text = "foo\x00bar"
+
+	var n int64
+	if err := db.QueryRow("SELECT arglen(?)", text).Scan(&n); err != nil {
+		t.Fatal("Failed to call db.QueryRow:", err)
+	}
+	if n != int64(len(text)) {
+		t.Errorf("text argument truncated at embedded NUL: got len %d, want %d", n, len(text))
+	}
+
+	var got string
+	if err := db.QueryRow("SELECT echo(?)", text).Scan(&got); err != nil {
+		t.Fatal("Failed to call db.QueryRow:", err)
+	}
+	if got != text {
+		t.Errorf("text result truncated at embedded NUL: got %q (len %d), want %q (len %d)", got, len(got), text, len(text))
 	}
 }
 
@@ -1710,7 +1854,7 @@ func TestDeclTypes(t *testing.T) {
 }
 
 func TestPinger(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlcipher", ":memory:")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1878,7 +2022,7 @@ func TestSetFileControlInt64(t *testing.T) {
 			},
 		})
 
-		db, err := sql.Open("sqlite3", "file:/dbname?vfs=memdb")
+		db, err := sql.Open("sqlcipher", "file:/dbname?vfs=memdb")
 		if err != nil {
 			t.Fatal("Failed to open database:", err)
 		}
@@ -1891,7 +2035,7 @@ func TestSetFileControlInt64(t *testing.T) {
 }
 
 func TestNonColumnString(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlcipher", ":memory:")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1911,7 +2055,7 @@ func TestNonColumnString(t *testing.T) {
 }
 
 func TestNilAndEmptyBytes(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlcipher", ":memory:")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1966,7 +2110,7 @@ func TestNilAndEmptyBytes(t *testing.T) {
 }
 
 func TestInsertNilByteSlice(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlcipher", ":memory:")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1987,7 +2131,7 @@ func TestInsertNilByteSlice(t *testing.T) {
 func TestNamedParam(t *testing.T) {
 	tempFilename := TempFilename(t)
 	defer os.Remove(tempFilename)
-	db, err := sql.Open("sqlite3", tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
 	if err != nil {
 		t.Fatal("Failed to open database:", err)
 	}
@@ -2020,6 +2164,112 @@ func TestNamedParam(t *testing.T) {
 	rows.Scan(&id, &name, &amount)
 	if id != 2 || name != "grault" || amount != 123 {
 		t.Errorf("Expected %d, %q, %d for fetched result, but got %d, %q, %d:", 2, "grault", 123, id, name, amount)
+	}
+}
+
+func TestNamedParamClearBindings(t *testing.T) {
+	tempFilename := TempFilename(t)
+	defer os.Remove(tempFilename)
+	db, err := sql.Open("sqlcipher", tempFilename)
+	if err != nil {
+		t.Fatal("Failed to open database:", err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec("create table foo (x integer, y integer, z text)")
+	if err != nil {
+		t.Fatal("Failed to create table:", err)
+	}
+
+	// First insert with all named params specified
+	_, err = db.Exec("insert into foo(x, y, z) values($x, $y, $z)",
+		sql.Named("x", 1), sql.Named("y", 2), sql.Named("z", "three"))
+	if err != nil {
+		t.Fatal("Failed to insert:", err)
+	}
+
+	// Second insert: $y should be NULL since we pass nil explicitly
+	_, err = db.Exec("insert into foo(x, y, z) values($x, $y, $z)",
+		sql.Named("x", 10), sql.Named("y", nil), sql.Named("z", nil))
+	if err != nil {
+		t.Fatal("Failed to insert:", err)
+	}
+
+	var x int
+	var y, z sql.NullInt64
+	err = db.QueryRow("select x, y, z from foo where x = 10").Scan(&x, &y, &z)
+	if err != nil {
+		t.Fatal("Failed to query:", err)
+	}
+	if y.Valid {
+		t.Errorf("Expected y to be NULL, got %d", y.Int64)
+	}
+	if z.Valid {
+		t.Errorf("Expected z to be NULL, got %d", z.Int64)
+	}
+}
+
+func TestNotEnoughArgsErrorMessage(t *testing.T) {
+	db, err := sql.Open("sqlcipher", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	const want = "not enough args to execute query: want 1 got 0"
+
+	t.Run("exec", func(t *testing.T) {
+		_, err := db.Exec("SELECT ?; SELECT ?", "hello")
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if err.Error() != want {
+			t.Errorf("got %q, want %q", err.Error(), want)
+		}
+	})
+
+	t.Run("query", func(t *testing.T) {
+		_, err := db.Query("SELECT ?; SELECT ?", "hello")
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if err.Error() != want {
+			t.Errorf("got %q, want %q", err.Error(), want)
+		}
+	})
+}
+
+// https://github.com/sjzar/go-sqlcipher/issues/1390
+// sqlite3_prepare_v2 returns SQLITE_OK with a NULL statement handle when the
+// input contains no SQL (only whitespace or comments). Querying such input
+// must not panic.
+func TestQueryCommentOnly(t *testing.T) {
+	db, err := sql.Open("sqlcipher", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	cases := []string{"", "   ", "-- comment", "---- comment\n", "/* block */"}
+	for _, q := range cases {
+		var x int
+		if err := db.QueryRow(q).Scan(&x); err != sql.ErrNoRows {
+			t.Errorf("QueryRow(%q): expected ErrNoRows, got %v", q, err)
+		}
+
+		rows, err := db.Query(q)
+		if err != nil {
+			t.Errorf("Query(%q): unexpected error: %v", q, err)
+			continue
+		}
+		if rows.Next() {
+			t.Errorf("Query(%q): expected no rows", q)
+		}
+		rows.Close()
+
+		if _, err := db.Exec(q); err != nil {
+			t.Errorf("Exec(%q): unexpected error: %v", q, err)
+		}
 	}
 }
 
@@ -2096,7 +2346,7 @@ var db *TestDB
 
 func initializeTestDB(t testing.TB) {
 	tempFilename := TempFilename(t)
-	d, err := sql.Open("sqlite3", tempFilename+"?_busy_timeout=99999")
+	d, err := sql.Open("sqlcipher", tempFilename+"?_busy_timeout=99999")
 	if err != nil {
 		os.Remove(tempFilename)
 		t.Fatal(err)
@@ -2598,7 +2848,7 @@ func benchmarkStmtRows(b *testing.B) {
 
 func benchmarkQueryParallel(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
-		db, err := sql.Open("sqlite3", ":memory:")
+		db, err := sql.Open("sqlcipher", ":memory:")
 		if err != nil {
 			panic(err)
 		}

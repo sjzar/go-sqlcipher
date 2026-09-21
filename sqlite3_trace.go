@@ -4,7 +4,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build sqlite_trace || trace
-// +build sqlite_trace trace
 
 package sqlite3
 
@@ -16,7 +15,7 @@ package sqlite3
 #endif
 #include <stdlib.h>
 
-int traceCallbackTrampoline(unsigned int traceEventCode, void *ctx, void *p, void *x);
+int gsc_traceCallbackTrampoline(unsigned int traceEventCode, void *ctx, void *p, void *x);
 */
 import "C"
 
@@ -98,8 +97,8 @@ func fillExpandedSQL(info *TraceInfo, db *C.sqlite3, pStmt unsafe.Pointer) {
 	info.ExpandedSQL = C.GoString(expSQLiteCStr)
 }
 
-//export traceCallbackTrampoline
-func traceCallbackTrampoline(
+//export gsc_traceCallbackTrampoline
+func gsc_traceCallbackTrampoline(
 	traceEventCode C.uint,
 	// Parameter named 'C' in SQLite docs = Context given at registration:
 	ctx unsafe.Pointer,
@@ -277,7 +276,7 @@ func (c *SQLiteConn) SetTrace(requested *TraceConfig) error {
 func (c *SQLiteConn) setSQLiteTrace(sqliteEventMask uint) error {
 	rv := C.sqlite3_trace_v2(c.db,
 		C.uint(sqliteEventMask),
-		(*[0]byte)(unsafe.Pointer(C.traceCallbackTrampoline)),
+		(*[0]byte)(unsafe.Pointer(C.gsc_traceCallbackTrampoline)),
 		unsafe.Pointer(c.db)) // Fourth arg is same as first: we are
 	// passing the database connection handle as callback context.
 

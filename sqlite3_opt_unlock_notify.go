@@ -4,7 +4,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build cgo && sqlite_unlock_notify
-// +build cgo,sqlite_unlock_notify
 
 package sqlite3
 
@@ -18,9 +17,10 @@ package sqlite3
 #include <sqlite3.h>
 #endif
 
-extern void unlock_notify_callback(void *arg, int argc);
+extern void gsc_unlock_notify_callback(void *arg, int argc);
 */
 import "C"
+
 import (
 	"fmt"
 	"math"
@@ -61,8 +61,8 @@ func (t *unlock_notify_table) get(h uint) chan struct{} {
 	return c
 }
 
-//export unlock_notify_callback
-func unlock_notify_callback(argv unsafe.Pointer, argc C.int) {
+//export gsc_unlock_notify_callback
+func gsc_unlock_notify_callback(argv unsafe.Pointer, argc C.int) {
 	for i := 0; i < int(argc); i++ {
 		parg := ((*(*[(math.MaxInt32 - 1) / unsafe.Sizeof((*C.uint)(nil))]*[1]uint)(argv))[i])
 		arg := *parg
@@ -72,8 +72,8 @@ func unlock_notify_callback(argv unsafe.Pointer, argc C.int) {
 	}
 }
 
-//export unlock_notify_wait
-func unlock_notify_wait(db *C.sqlite3) C.int {
+//export gsc_unlock_notify_wait
+func gsc_unlock_notify_wait(db *C.sqlite3) C.int {
 	// It has to be a bufferred channel to not block in sqlite_unlock_notify
 	// as sqlite_unlock_notify could invoke the callback before it returns.
 	c := make(chan struct{}, 1)
@@ -82,12 +82,12 @@ func unlock_notify_wait(db *C.sqlite3) C.int {
 	h := unt.add(c)
 	defer unt.remove(h)
 
-	pargv := C.malloc(C.sizeof_uint)
+	pargv := C.malloc(C.size_t(unsafe.Sizeof(uint(0))))
 	defer C.free(pargv)
 
 	argv := (*[1]uint)(pargv)
 	argv[0] = h
-	if rv := C.sqlite3_unlock_notify(db, (*[0]byte)(C.unlock_notify_callback), unsafe.Pointer(pargv)); rv != C.SQLITE_OK {
+	if rv := C.sqlite3_unlock_notify(db, (*[0]byte)(C.gsc_unlock_notify_callback), unsafe.Pointer(pargv)); rv != C.SQLITE_OK {
 		return rv
 	}
 

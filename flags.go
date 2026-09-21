@@ -1,6 +1,11 @@
 package sqlite3
 
+//go:generate go run ./scripts/generate_namespace.go
+
 /*
+// Isolate the SQLite API, C helpers and exported Go callbacks from mattn/go-sqlite3.
+#cgo CFLAGS: -include ${SRCDIR}/sqlcipher_namespace.h
+
 // make go-sqlite3 use embedded library without code changes
 #cgo CFLAGS: -DUSE_LIBSQLITE3
 

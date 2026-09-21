@@ -5,7 +5,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build sqlite_preupdate_hook
-// +build sqlite_preupdate_hook
 
 package sqlite3
 
@@ -21,7 +20,7 @@ package sqlite3
 #include <stdlib.h>
 #include <string.h>
 
-void preUpdateHookTrampoline(void*, sqlite3 *, int, char *, char *, sqlite3_int64, sqlite3_int64);
+void gsc_preUpdateHookTrampoline(void*, sqlite3 *, int, char *, char *, sqlite3_int64, sqlite3_int64);
 */
 import "C"
 import (
@@ -41,7 +40,7 @@ func (c *SQLiteConn) RegisterPreUpdateHook(callback func(SQLitePreUpdateData)) {
 	if callback == nil {
 		C.sqlite3_preupdate_hook(c.db, nil, nil)
 	} else {
-		C.sqlite3_preupdate_hook(c.db, (*[0]byte)(unsafe.Pointer(C.preUpdateHookTrampoline)), unsafe.Pointer(newHandle(c, callback)))
+		C.sqlite3_preupdate_hook(c.db, (*[0]byte)(unsafe.Pointer(C.gsc_preUpdateHookTrampoline)), unsafe.Pointer(newHandle(c, callback)))
 	}
 }
 
@@ -59,13 +58,17 @@ func (d *SQLitePreUpdateData) row(dest []any, new bool) error {
 	for i := 0; i < d.Count() && i < len(dest); i++ {
 		var val *C.sqlite3_value
 		var src any
+		var rc C.int
 
 		// Initially I tried making this just a function pointer argument, but
 		// it's absurdly complicated to pass C function pointers.
 		if new {
-			C.sqlite3_preupdate_new(d.Conn.db, C.int(i), &val)
+			rc = C.sqlite3_preupdate_new(d.Conn.db, C.int(i), &val)
 		} else {
-			C.sqlite3_preupdate_old(d.Conn.db, C.int(i), &val)
+			rc = C.sqlite3_preupdate_old(d.Conn.db, C.int(i), &val)
+		}
+		if rc != C.SQLITE_OK {
+			return Error{Code: ErrNo(rc)}
 		}
 
 		switch C.sqlite3_value_type(val) {

@@ -4,7 +4,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build !cgo
-// +build !cgo
 
 package sqlite3
 
@@ -17,7 +16,7 @@ import (
 var errorMsg = errors.New("Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 requires cgo to work. This is a stub")
 
 func init() {
-	sql.Register("sqlite3", &SQLiteDriver{})
+	sql.Register("sqlcipher", &SQLiteDriver{})
 }
 
 type (

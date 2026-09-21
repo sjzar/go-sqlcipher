@@ -4,7 +4,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build sqlite_vtable || vtable
-// +build sqlite_vtable vtable
 
 package sqlite3
 
@@ -278,6 +277,19 @@ func TestVUpdate(t *testing.T) {
 	}
 	if !reflect.DeepEqual(vt.data[1], []any{int64(117), "f", "e"}) {
 		t.Fatalf("expected table vt entry 1 to be [117 f e], instead: %v", vt.data[1])
+	}
+
+	// a rowid-changing update cannot be expressed via VTabUpdater and
+	// must be rejected instead of updating the wrong row
+	_, err = db.Exec(`update vt set rowid = rowid + 10 where f1 = 117`)
+	if err == nil {
+		t.Fatalf("expected error on rowid-changing update, got nil")
+	}
+	if !strings.Contains(err.Error(), "does not support changing the rowid") {
+		t.Fatalf("unexpected error on rowid-changing update: %v", err)
+	}
+	if !reflect.DeepEqual(vt.data[1], []any{int64(117), "f", "e"}) {
+		t.Fatalf("expected table vt entry 1 to be unchanged, instead: %v", vt.data[1])
 	}
 
 	// delete from vt

@@ -1,7 +1,7 @@
 To maintain this code properly, the following three repositories have to be
 tracked for changes (maintenance details below):
 
-- https://github.com/mattn/go-sqlite
+- https://github.com/mattn/go-sqlite3
 - https://github.com/sqlcipher/sqlcipher
 - https://github.com/libtom/libtomcrypt
 
@@ -9,12 +9,33 @@ tracked for changes (maintenance details below):
 Update code from https://github.com/mattn/go-sqlite3
 ----------------------------------------------------
 
-Current release: v1.14.33
+Current release: v1.14.52 (b0be46fa28d17ee0b65c79774ac0dad84b6db068)
+Minimum Go version: 1.21
 
 1. git clone mattn/go-sqlite3 new version to temp dir
 2. Use ./track_go-sqlite3.sh <mattn/go-sqlite3 dir>
 3. find & sed mattn/go-sqlite3 to sjzar/go-sqlcipher
 4. rewrite pragma args golang code to sqlite3.go
+5. Remove Go files deleted upstream (for this upgrade: sqlite3_go18.go,
+   sqlite3_go18_test.go, sqlite3_go113_test.go; their code moved into other files).
+6. Keep the default database/sql driver name "sqlcipher" in both cgo and
+   non-cgo builds, and update the examples and tests to use that name.
+7. Prefix all //export callback names and their Go/C references with gsc_.
+   A C macro alone does not rename cgo's Go-side references to callback addresses.
+8. Preserve flags.go and run go generate ./... to regenerate sqlcipher_namespace.h.
+   The forced include applies to the SQLite API and C helpers in every C/cgo
+   compilation unit. Do not suppress duplicate symbols at link time.
+9. Run make test.
+
+This procedure updates the Go driver, tests and examples only. The SQLCipher
+amalgamation and LibTomCrypt retain the versions below; do not copy mattn's
+sqlite3-binding.c/h over them. The bundled SQLCipher 4.12.0 engine is based on
+SQLite 3.51.1, independent of mattn's bundled SQLite version.
+
+Namespace header generation scans unpreprocessed declarations, so it includes
+platform and optional APIs. A few omitted SQLite APIs become preprocessor
+constants; the generator preserves their build-option guards. Update these
+guards if a later engine upgrade changes those declarations.
 
 
 Update code from https://github.com/sqlcipher/sqlcipher

@@ -15,9 +15,28 @@ conforming to the built-in database/sql interface. It is based on:
 
 SQLite itself is part of SQLCipher.
 
+The Go driver tracks **mattn/go-sqlite3 v1.14.52** and requires **Go 1.21+**
+and CGO. The bundled encryption engine remains **SQLCipher 4.12.0 / SQLite
+3.51.1**; updating the Go driver does not replace the encryption engine.
+
+### Driver name and coexistence
+
+The default `database/sql` driver name is now **`sqlcipher`**. Existing callers
+must change `sql.Open("sqlite3", dsn)` to `sql.Open("sqlcipher", dsn)` when
+upgrading from v0.0.3. The Go package name and exported API remain `sqlite3`.
+
+SQLite C API symbols, C bridge helpers, and exported Go callbacks use a `gsc_`
+prefix, so this package can coexist with unmodified `mattn/go-sqlite3`, which
+keeps the `sqlite3` driver name. Database handles, callback registrations and
+allocated memory belong to their originating driver and must not be mixed.
+
+`driverName` remains overridable with `-ldflags -X` for existing custom-name
+builds. Using `sqlite3` as the override is only valid when mattn is absent.
+There is no automatic `sqlite3` alias because it would recreate the conflict.
+
 ### Incompatibilities of SQLCipher
 
-The version tags of go-sqlcipher are the same as for SQLCipher.
+The module's version tags are independent of the bundled SQLCipher version.
 
 **SQLCipher 4.x is incompatible with SQLCipher 3.x!**
 
@@ -45,7 +64,7 @@ To create and open encrypted database files use the following DSN parameters:
 ```go
 key := "2DD29CA851E7B56E4697B0E1F08507293D761A05CE4D1B628663F411A8086D99"
 dbname := fmt.Sprintf("db?_pragma_key=x'%s'&_pragma_cipher_page_size=4096", key)
-db, _ := sql.Open("sqlite3", dbname)
+db, _ := sql.Open("sqlcipher", dbname)
 ```
 
 `_pragma_key` is the hex encoded 32 byte key (must be 64 characters long).
@@ -55,7 +74,7 @@ you want a different value than the default size).
 ```go
 key := url.QueryEscape("secret")
 dbname := fmt.Sprintf("db?_pragma_key=%s&_pragma_cipher_page_size=4096", key)
-db, _ := sql.Open("sqlite3", dbname)
+db, _ := sql.Open("sqlcipher", dbname)
 ```
 
 This uses a passphrase directly as `_pragma_key` with the key derivation function in
@@ -71,6 +90,17 @@ Use the function
 to check whether a database file is encrypted or not.
 
 Examples can be found under the `./_example` directory
+
+### Development
+
+Run `make test` for default and optional-feature race tests and `go vet`.
+Run `go generate ./...` after updating the C sources or bridge helpers, and
+commit the generated namespace header. See [MAINTENANCE](MAINTENANCE) for the
+upstream synchronization procedure and the patches that must be preserved.
+
+The imported upstream code still has existing Staticcheck findings (including
+unused conversion helpers, deprecated test imports, and error-string style);
+`make test` does not claim a clean Staticcheck result.
 
 
 ### License

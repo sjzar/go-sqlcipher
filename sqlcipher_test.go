@@ -38,7 +38,7 @@ func init() {
 	}
 	dbname := filepath.Join(tmpdir, "sqlcipher_test")
 	dbnameWithDSN := dbname + fmt.Sprintf("?_pragma_key=%s&_pragma_cipher_page_size=4096", key)
-	db, err = sql.Open("sqlite3", dbnameWithDSN)
+	db, err = sql.Open("sqlcipher", dbnameWithDSN)
 	if err != nil {
 		panic(err)
 	}
@@ -56,7 +56,7 @@ func init() {
 		panic(errors.New("go-sqlcipher: DB not encrypted"))
 	}
 	// open DB for testing
-	db, err = sql.Open("sqlite3", dbnameWithDSN)
+	db, err = sql.Open("sqlcipher", dbnameWithDSN)
 	if err != nil {
 		panic(err)
 	}
@@ -104,7 +104,7 @@ func TestSQLCipherIsEncryptedFalse(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpdir)
 	dbname := filepath.Join(tmpdir, "unencrypted.sqlite")
-	db, err := sql.Open("sqlite3", dbname)
+	db, err := sql.Open("sqlcipher", dbname)
 	require.NoError(t, err)
 	defer db.Close()
 	_, err = db.Exec(tables)
@@ -125,7 +125,7 @@ func TestSQLCipherIsEncryptedTrue(t *testing.T) {
 	require.NoError(t, err)
 	dbnameWithDSN := dbname + fmt.Sprintf("?_pragma_key=x'%s'",
 		hex.EncodeToString(key[:]))
-	db, err := sql.Open("sqlite3", dbnameWithDSN)
+	db, err := sql.Open("sqlcipher", dbnameWithDSN)
 	require.NoError(t, err)
 	defer db.Close()
 	_, err = db.Exec(tables)
@@ -148,7 +148,7 @@ func TestSQLCipher3DB(t *testing.T) {
 		t.Fatal("go-sqlcipher: DB not encrypted")
 	}
 	// open DB for testing
-	db, err := sql.Open("sqlite3", dbnameWithDSN)
+	db, err := sql.Open("sqlcipher", dbnameWithDSN)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func TestSQLCipher4DB(t *testing.T) {
 		t.Fatal("go-sqlcipher: DB not encrypted")
 	}
 	// open DB for testing
-	db, err := sql.Open("sqlite3", dbnameWithDSN)
+	db, err := sql.Open("sqlcipher", dbnameWithDSN)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +194,7 @@ func ExampleIsEncrypted() {
 	dbnameWithDSN := dbname + fmt.Sprintf("?_pragma_key=x'%s'",
 		hex.EncodeToString(key[:]))
 	// create encrypted DB file
-	db, err := sql.Open("sqlite3", dbnameWithDSN)
+	db, err := sql.Open("sqlcipher", dbnameWithDSN)
 	if err != nil {
 		log.Fatal(err)
 	}

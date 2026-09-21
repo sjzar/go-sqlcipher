@@ -17,12 +17,12 @@ func FuzzOpenExec(data []byte) int {
 	if err != nil {
 		return 0
 	}
-	db, err := sql.Open("sqlite3", "/tmp/fuzz.db")
+	db, err := sql.Open("sqlcipher", "/tmp/fuzz.db")
 	if err != nil {
 		return 0
 	}
 	defer db.Close()
-	_, err = db.Exec(string(data[:sep-1]))
+	_, err = db.Exec(string(data[:sep]))
 	if err != nil {
 		return 0
 	}

@@ -11,7 +11,7 @@ import (
 
 func create(dbname, password string) error {
 	dbnameWithDSN := dbname + fmt.Sprintf("?_pragma_key=%s&_pragma_cipher_page_size=4096", url.QueryEscape(password))
-	db, err := sql.Open("sqlite3", dbnameWithDSN)
+	db, err := sql.Open("sqlcipher", dbnameWithDSN)
 	if err != nil {
 		return err
 	}
