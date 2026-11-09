@@ -23,6 +23,12 @@ package sqlite3
 // use memory for temporay storage in sqlite
 #cgo CFLAGS: -DSQLITE_TEMP_STORE=2
 
+// FTS5 is always available so that RegisterFTS5Tokenizer works without build
+// tags; sqlite3_opt_fts5.go keeps the upstream tag file and repeats the same
+// definition harmlessly.
+#cgo CFLAGS: -DSQLITE_ENABLE_FTS5
+#cgo LDFLAGS: -lm
+
 // use libtomcrypt implementation in sqlcipher
 #cgo CFLAGS: -DSQLCIPHER_CRYPTO_LIBTOMCRYPT
 

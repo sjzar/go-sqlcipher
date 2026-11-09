@@ -91,6 +91,27 @@ to check whether a database file is encrypted or not.
 
 Examples can be found under the `./_example` directory
 
+### Full-text search
+
+FTS5 is compiled in by default; the `sqlite_fts5` build tag is no longer
+required. Custom FTS5 tokenizers can be implemented in Go and registered per
+connection with `SQLiteConn.RegisterFTS5Tokenizer`, typically from
+`SQLiteDriver.ConnectHook`. DSN key pragmas run before the hook, so the
+tokenizer is registered after an encrypted database has been keyed:
+
+```go
+sql.Register("sqlcipher_fts", &sqlite3.SQLiteDriver{
+	ConnectHook: func(c *sqlite3.SQLiteConn) error {
+		return c.RegisterFTS5Tokenizer("mytok", func(args []string) (sqlite3.FTS5Tokenizer, error) {
+			return myTokenizer{}, nil
+		})
+	},
+})
+// CREATE VIRTUAL TABLE docs USING fts5(body, tokenize = 'mytok arg1');
+```
+
+Registration requires cgo; the `CGO_ENABLED=0` stub returns an error.
+
 ### Development
 
 Run `make test` for default and optional-feature race tests and `go vet`.

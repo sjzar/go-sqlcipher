@@ -25,6 +25,10 @@ Minimum Go version: 1.21
 8. Preserve flags.go and run go generate ./... to regenerate sqlcipher_namespace.h.
    The forced include applies to the SQLite API and C helpers in every C/cgo
    compilation unit. Do not suppress duplicate symbols at link time.
+   flags.go enables FTS5 unconditionally; keep upstream's sqlite3_opt_fts5.go
+   tag file as is, since repeating the same definition is harmless.
+   Preserve the fork-owned sqlite3_fts5_tokenizer*.go files (FTS5 tokenizer
+   registration); upstream has no counterpart.
 9. Run make test.
 
 This procedure updates the Go driver, tests and examples only. The SQLCipher
